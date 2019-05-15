@@ -9,6 +9,7 @@ public class LoanWriterServiceImpl implements LoanWriterService<Void> {
 
     @Override
     public Void writeLoan(Loan loan) {
+        System.out.println(loan.getId());
         return null;
     }
 }

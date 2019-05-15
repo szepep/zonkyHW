@@ -41,23 +41,22 @@ public class LoanReaderServiceImpl implements LoanReaderService {
 
     @Override
     public List<Loan> getLoansFrom(OffsetDateTime from) {
-        List<Object> result = new ArrayList<>();
+        List<Loan> result = new ArrayList<>();
 
         // Bug in RestTemplate, escaping '+' not works, using '%2B' throws exception.
         String dateTime = from.toString().substring(0, 23);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HEADER_SIZE, Integer.toString(pageSize));
+        headers.add(HEADER_ORDER, FIELD_PUBLISHED);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         int page = 0;
         boolean allDataRead = false;
         while (!allDataRead) {
             try {
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(HEADER_SIZE, Integer.toString(pageSize));
-                headers.add(HEADER_PAGE, Integer.toString(page));
-                headers.add(HEADER_ORDER, FIELD_PUBLISHED);
-                headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
+                headers.set(HEADER_PAGE, Integer.toString(page));
                 String url = String.format("%s?%s__gte=%s", zonkyUrl, FIELD_PUBLISHED, dateTime);
-
                 ResponseEntity<List<Loan>> responseEntity = restTemplate.exchange(
                         url,
                         HttpMethod.GET,
@@ -71,6 +70,6 @@ public class LoanReaderServiceImpl implements LoanReaderService {
                 System.err.println(e);
             }
         }
-        return null;
+        return result;
     }
 }
