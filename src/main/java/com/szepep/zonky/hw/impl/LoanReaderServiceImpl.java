@@ -43,7 +43,7 @@ public class LoanReaderServiceImpl implements LoanReaderService {
     public List<Loan> getLoansFrom(OffsetDateTime from) {
         List<Object> result = new ArrayList<>();
 
-        // Bug in RestTemplate, escaping is not working
+        // Bug in RestTemplate, escaping '+' not works, using '%2B' throws exception.
         String dateTime = from.toString().substring(0, 23);
 
         int page = 0;

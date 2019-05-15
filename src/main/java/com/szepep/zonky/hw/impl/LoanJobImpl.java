@@ -10,7 +10,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class LoanJobImpl implements Job {
@@ -18,6 +21,7 @@ public class LoanJobImpl implements Job {
     private final LoanReaderService reader;
     private final LoanWriterService writer;
     private OffsetDateTime lastTimestamp;
+    volatile Set<Integer> alreadyRetrievedIDs = Collections.emptySet();
 
     @Autowired
     LoanJobImpl(LoanReaderService reader,
@@ -32,6 +36,19 @@ public class LoanJobImpl implements Job {
     @Override
     public void run() {
         List<Loan> loans = reader.getLoansFrom(lastTimestamp);
-        loans.forEach(writer::writeLoan);
+        Loan lastItem = loans.get(loans.size() - 1);
+        String lastTimestamp = lastItem.getDatePublished();
+
+        List<Loan> newLoans = loans.stream()
+                .filter(l -> !alreadyRetrievedIDs.contains(l.getId()))
+                .collect(Collectors.toList());
+
+        Set<Integer> tmpAlreadyRetrieved = newLoans.stream()
+                .filter(l -> l.getDatePublished().equals(lastTimestamp))
+                .map(Loan::getId)
+                .collect(Collectors.toSet());
+        this.alreadyRetrievedIDs = tmpAlreadyRetrieved;
+
+        newLoans.forEach(writer::writeLoan);
     }
 }
