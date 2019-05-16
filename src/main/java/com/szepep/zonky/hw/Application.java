@@ -15,8 +15,7 @@ import java.util.concurrent.TimeUnit;
 @SpringBootApplication
 public class Application implements CommandLineRunner {
 
-    private static Logger log = LoggerFactory
-            .getLogger(Application.class);
+    private static Logger log = LoggerFactory.getLogger(Application.class);
     private final ScheduledExecutorService executorService;
     private final int period;
     private final TimeUnit timeUnit;
@@ -41,6 +40,5 @@ public class Application implements CommandLineRunner {
     public void run(String... args) {
         log.info("Application started with arguments: " + String.join(", ", args));
         executorService.scheduleAtFixedRate(job, 0, period, timeUnit);
-
     }
 }

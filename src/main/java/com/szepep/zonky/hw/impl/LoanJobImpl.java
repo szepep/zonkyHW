@@ -1,9 +1,12 @@
 package com.szepep.zonky.hw.impl;
 
 import com.szepep.zonky.hw.api.Job;
+import com.szepep.zonky.hw.api.LoanException;
 import com.szepep.zonky.hw.api.LoanReaderService;
 import com.szepep.zonky.hw.api.LoanWriterService;
 import com.szepep.zonky.hw.dto.Loan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,6 +20,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class LoanJobImpl implements Job {
+
+    private static Logger log = LoggerFactory.getLogger(LoanJobImpl.class);
 
     private final LoanReaderService reader;
     private final LoanWriterService writer;
@@ -35,20 +40,26 @@ public class LoanJobImpl implements Job {
 
     @Override
     public void run() {
-        List<Loan> loans = reader.getLoansFrom(lastTimestamp);
-        Loan lastItem = loans.get(loans.size() - 1);
-        String lastTimestamp = lastItem.getDatePublished();
+        try {
+            List<Loan> loans = reader.getLoansFrom(lastTimestamp);
+            Loan lastItem = loans.get(loans.size() - 1);
+            String lastTimestamp = lastItem.getDatePublished();
 
-        List<Loan> newLoans = loans.stream()
-                .filter(l -> !alreadyRetrievedIDs.contains(l.getId()))
-                .collect(Collectors.toList());
+            List<Loan> newLoans = loans.stream()
+                    .filter(l -> !alreadyRetrievedIDs.contains(l.getId()))
+                    .collect(Collectors.toList());
 
-        Set<Integer> tmpAlreadyRetrieved = newLoans.stream()
-                .filter(l -> l.getDatePublished().equals(lastTimestamp))
-                .map(Loan::getId)
-                .collect(Collectors.toSet());
-        this.alreadyRetrievedIDs = tmpAlreadyRetrieved;
+            Set<Integer> tmpAlreadyRetrieved = newLoans.stream()
+                    .filter(l -> l.getDatePublished().equals(lastTimestamp))
+                    .map(Loan::getId)
+                    .collect(Collectors.toSet());
+            this.alreadyRetrievedIDs = tmpAlreadyRetrieved;
 
-        newLoans.forEach(writer::writeLoan);
+            for (Loan newLoan : newLoans) {
+                writer.writeLoan(newLoan);
+            }
+        } catch (LoanException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

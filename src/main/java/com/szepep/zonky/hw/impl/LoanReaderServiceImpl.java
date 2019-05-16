@@ -2,11 +2,14 @@ package com.szepep.zonky.hw.impl;
 
 import com.szepep.zonky.hw.api.LoanReaderService;
 import com.szepep.zonky.hw.dto.Loan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.OffsetDateTime;
@@ -16,6 +19,8 @@ import java.util.List;
 
 @Service
 public class LoanReaderServiceImpl implements LoanReaderService {
+
+    private static Logger log = LoggerFactory.getLogger(LoanReaderServiceImpl.class);
 
     private static final String FIELD_PUBLISHED = "datePublished";
     private static final String HEADER_SIZE = "X-Size";
@@ -40,7 +45,7 @@ public class LoanReaderServiceImpl implements LoanReaderService {
     }
 
     @Override
-    public List<Loan> getLoansFrom(OffsetDateTime from) {
+    public List<Loan> getLoansFrom(OffsetDateTime from) throws LoanReaderException {
         List<Loan> result = new ArrayList<>();
 
         // Bug in RestTemplate, escaping '+' not works, using '%2B' throws exception.
@@ -54,20 +59,24 @@ public class LoanReaderServiceImpl implements LoanReaderService {
         int page = 0;
         boolean allDataRead = false;
         while (!allDataRead) {
+            headers.set(HEADER_PAGE, Integer.toString(page));
+            String url = String.format("%s?%s__gte=%s", zonkyUrl, FIELD_PUBLISHED, dateTime);
+            String requestMsg = String.format("URL: %s\nheaders: %s", url, headers);
             try {
-                headers.set(HEADER_PAGE, Integer.toString(page));
-                String url = String.format("%s?%s__gte=%s", zonkyUrl, FIELD_PUBLISHED, dateTime);
-                ResponseEntity<List<Loan>> responseEntity = restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        new HttpEntity<>(headers),
-                        responseType);
+                log.info("Executing HTTP GET\n" + requestMsg);
+                ResponseEntity<List<Loan>> responseEntity = restTemplate.exchange(url, HttpMethod.GET,
+                        new HttpEntity<>(headers), responseType);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new LoanReaderException(String.format("Server returned %d while reading loans\n%s",
+                            responseEntity.getStatusCodeValue(), requestMsg));
+                }
+
                 result.addAll(responseEntity.getBody());
                 int total = Integer.parseInt(responseEntity.getHeaders().get(HEADER_TOTAL).get(0));
                 allDataRead = result.size() == total;
                 ++page;
-            } catch (Exception e) {
-                System.err.println(e);
+            } catch (RestClientException e) {
+                throw new LoanReaderException(String.format("Unable to read loan\n%s", requestMsg), e);
             }
         }
         return result;
