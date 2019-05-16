@@ -12,7 +12,7 @@ public class LoanWriterServiceImpl implements LoanWriterService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public LoanWriterServiceImpl() {
+    LoanWriterServiceImpl() {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 

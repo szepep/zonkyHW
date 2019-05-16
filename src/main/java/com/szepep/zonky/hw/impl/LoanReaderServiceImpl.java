@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 public class LoanReaderServiceImpl implements LoanReaderService {
 
-    private static Logger log = LoggerFactory.getLogger(LoanReaderServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(LoanReaderServiceImpl.class);
 
     private static final String FIELD_PUBLISHED = "datePublished";
     private static final String HEADER_SIZE = "X-Size";
@@ -36,9 +36,9 @@ public class LoanReaderServiceImpl implements LoanReaderService {
             };
 
     @Autowired
-    public LoanReaderServiceImpl(RestTemplate restTemplate,
-                                 @Value("${zonky.url}") String zonkyUrl,
-                                 @Value("${zonky.pageSize}") int pageSize) {
+    LoanReaderServiceImpl(RestTemplate restTemplate,
+                          @Value("${zonky.url}") String zonkyUrl,
+                          @Value("${zonky.pageSize}") int pageSize) {
         this.restTemplate = restTemplate;
         this.zonkyUrl = zonkyUrl;
         this.pageSize = pageSize;

@@ -3,6 +3,7 @@ package com.szepep.zonky.hw.api;
 /**
  * Base class of exceptions thrown by {@link LoanReaderService} and {@link LoanWriterService}.
  */
+@SuppressWarnings("WeakerAccess")
 public abstract class LoanException extends Exception {
     public LoanException() {
     }

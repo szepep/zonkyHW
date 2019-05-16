@@ -12,7 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @Configuration
 @ComponentScan(basePackageClasses = Config.class)
 @PropertySource(value = "classpath:application.properties")
-public class Config {
+class Config {
 
     @Bean
     public RestTemplate restTemplate() {

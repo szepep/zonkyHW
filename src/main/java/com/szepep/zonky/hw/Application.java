@@ -13,19 +13,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
-public class Application implements CommandLineRunner {
+class Application implements CommandLineRunner {
 
-    private static Logger log = LoggerFactory.getLogger(Application.class);
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
     private final ScheduledExecutorService executorService;
     private final int period;
     private final TimeUnit timeUnit;
     private final Job job;
 
     @Autowired
-    public Application(ScheduledExecutorService executorService,
-                       Job job,
-                       @Value("${period.time.value}") int period,
-                       @Value("${period.time.unit}") TimeUnit unit) {
+    Application(ScheduledExecutorService executorService,
+                Job job,
+                @Value("${period.time.value}") int period,
+                @Value("${period.time.unit}") TimeUnit unit) {
         this.executorService = executorService;
         this.job = job;
         this.period = period;
