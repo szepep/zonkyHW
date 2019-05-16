@@ -1,5 +1,8 @@
 package com.szepep.zonky.hw.api;
 
+/**
+ * Base class of exceptions thrown by {@link LoanReaderService} and {@link LoanWriterService}.
+ */
 public abstract class LoanException extends Exception {
     public LoanException() {
     }

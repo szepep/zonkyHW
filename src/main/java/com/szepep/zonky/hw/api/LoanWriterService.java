@@ -2,10 +2,19 @@ package com.szepep.zonky.hw.api;
 
 import com.szepep.zonky.hw.dto.Loan;
 
+/**
+ * Writer for loans.
+ */
 @FunctionalInterface
-public interface LoanWriterService<R> {
+public interface LoanWriterService {
 
-    R writeLoan(Loan loan) throws LoanWriterException;
+    /**
+     * Writes loan.
+     *
+     * @param loan The loan to write.
+     * @throws LoanWriterException When any problem occurres while writing loan.
+     */
+    void writeLoan(Loan loan) throws LoanWriterException;
 
     final class LoanWriterException extends LoanException {
         public LoanWriterException() {

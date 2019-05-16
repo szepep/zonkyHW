@@ -30,7 +30,7 @@ public class LoanJobImpl implements Job {
 
     @Autowired
     LoanJobImpl(LoanReaderService reader,
-                LoanWriterService<?> writer,
+                LoanWriterService writer,
                 @Value("${zonky.first.read.time.value}") int period,
                 @Value("${zonky.first.read.time.unit}") ChronoUnit unit) {
         this.reader = reader;

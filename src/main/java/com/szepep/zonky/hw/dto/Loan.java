@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Simplified DTO for Loans containing only the properties used by current codebase.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Loan {
 
