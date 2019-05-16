@@ -27,10 +27,12 @@ public class LoanReaderServiceImpl implements LoanReaderService {
     private static final String HEADER_TOTAL = "X-Total";
     private static final String HEADER_PAGE = "X-Page";
     private static final String HEADER_ORDER = "X-Order";
+    private static final String HEADER_USER_AGENT = "User-Agent";
 
     private final RestTemplate restTemplate;
     private final String zonkyUrl;
     private final int pageSize;
+    private final String userAgent;
     private final ParameterizedTypeReference<List<Loan>> responseType =
             new ParameterizedTypeReference<List<Loan>>() {
             };
@@ -38,10 +40,12 @@ public class LoanReaderServiceImpl implements LoanReaderService {
     @Autowired
     LoanReaderServiceImpl(RestTemplate restTemplate,
                           @Value("${zonky.url}") String zonkyUrl,
-                          @Value("${zonky.pageSize}") int pageSize) {
+                          @Value("${zonky.pageSize}") int pageSize,
+                          @Value("${userAgent}") String userAgent) {
         this.restTemplate = restTemplate;
         this.zonkyUrl = zonkyUrl;
         this.pageSize = pageSize;
+        this.userAgent = userAgent;
     }
 
     @Override
@@ -52,8 +56,9 @@ public class LoanReaderServiceImpl implements LoanReaderService {
         String dateTime = from.toString().substring(0, 23);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HEADER_SIZE, Integer.toString(pageSize));
+        headers.add(HEADER_SIZE, Integer.toString(pageSize));
         headers.add(HEADER_ORDER, FIELD_PUBLISHED);
+        headers.add(HEADER_USER_AGENT, userAgent);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         int page = 0;
