@@ -77,7 +77,7 @@ public class LoanReaderServiceImpl implements LoanReaderService {
                 }
 
                 result.addAll(responseEntity.getBody());
-                int total = Integer.parseInt(responseEntity.getHeaders().get(HEADER_TOTAL).get(0));
+                int total = Integer.parseInt(responseEntity.getHeaders().getFirst(HEADER_TOTAL));
                 allDataRead = result.size() == total;
                 ++page;
             } catch (RestClientException e) {

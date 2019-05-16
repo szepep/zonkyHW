@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Simplified DTO for Loans containing only the properties used by current codebase.
@@ -50,4 +51,18 @@ public class Loan {
         this.additionalProperties.put(name, value);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Loan loan = (Loan) o;
+        return Objects.equals(id, loan.id) &&
+                Objects.equals(datePublished, loan.datePublished) &&
+                Objects.equals(additionalProperties, loan.additionalProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, datePublished, additionalProperties);
+    }
 }
