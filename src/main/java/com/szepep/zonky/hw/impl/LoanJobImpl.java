@@ -19,14 +19,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class LoanJobImpl implements Job {
+class LoanJobImpl implements Job {
 
-    private static Logger log = LoggerFactory.getLogger(LoanJobImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(LoanJobImpl.class);
 
     private final LoanReaderService reader;
     private final LoanWriterService writer;
     private OffsetDateTime lastTimestamp;
-    volatile Set<Integer> alreadyRetrievedIDs = Collections.emptySet();
+    private volatile Set<Integer> alreadyRetrievedIDs = Collections.emptySet();
 
     @Autowired
     LoanJobImpl(LoanReaderService reader,
@@ -43,14 +43,18 @@ public class LoanJobImpl implements Job {
         try {
             List<Loan> loans = reader.getLoansFrom(lastTimestamp);
             Loan lastItem = loans.get(loans.size() - 1);
-            String lastTimestamp = lastItem.getDatePublished();
+            String datePublished = lastItem.getDatePublished();
 
             List<Loan> newLoans = loans.stream()
                     .filter(l -> !alreadyRetrievedIDs.contains(l.getId()))
                     .collect(Collectors.toList());
 
+            // To ensure visibility the elements of the set in multithreaded environment
+            // the usage of tmp set is mandatory. For details see
+            // https://www.infoq.com/articles/memory_barriers_jvm_concurrency
+            @SuppressWarnings("UnnecessaryLocalVariable")
             Set<Integer> tmpAlreadyRetrieved = newLoans.stream()
-                    .filter(l -> l.getDatePublished().equals(lastTimestamp))
+                    .filter(l -> l.getDatePublished().equals(datePublished))
                     .map(Loan::getId)
                     .collect(Collectors.toSet());
             this.alreadyRetrievedIDs = tmpAlreadyRetrieved;
@@ -58,6 +62,7 @@ public class LoanJobImpl implements Job {
             for (Loan newLoan : newLoans) {
                 writer.writeLoan(newLoan);
             }
+            lastTimestamp = OffsetDateTime.parse(datePublished);
         } catch (LoanException e) {
             log.error(e.getMessage(), e);
         }
