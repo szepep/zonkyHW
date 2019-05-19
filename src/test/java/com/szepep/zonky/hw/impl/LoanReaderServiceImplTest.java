@@ -13,6 +13,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Random;
 
+import static com.szepep.zonky.hw.Utils.createLoan;
+import static com.szepep.zonky.hw.Utils.createResponseHeaders;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -55,12 +57,6 @@ public class LoanReaderServiceImplTest {
         assertEquals(Integer.toString(pageSize), requestHeaders.getFirst("X-Size"));
         assertEquals("datePublished", requestHeaders.getFirst("X-Order"));
         assertEquals("user", requestHeaders.getFirst("User-Agent"));
-    }
-
-    private HttpHeaders createResponseHeaders(int total) {
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.add("X-Total", Integer.toString(total));
-        return responseHeaders;
     }
 
     @Test
@@ -143,12 +139,5 @@ public class LoanReaderServiceImplTest {
 
         List<Loan> loans = underTest.getLoansFrom(OffsetDateTime.now());
     }
-
-    private Loan createLoan(int id) {
-        Loan loan = new Loan();
-        loan.setId(id);
-        return loan;
-    }
-
 
 }

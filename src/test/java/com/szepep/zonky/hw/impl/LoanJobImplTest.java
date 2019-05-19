@@ -1,5 +1,6 @@
 package com.szepep.zonky.hw.impl;
 
+import com.szepep.zonky.hw.Utils;
 import com.szepep.zonky.hw.api.LoanReaderService;
 import com.szepep.zonky.hw.api.LoanWriterService;
 import com.szepep.zonky.hw.dto.Loan;
@@ -64,7 +65,7 @@ public class LoanJobImplTest {
         LoanReaderService reader = mock(LoanReaderService.class);
         LoanWriterService writer = mock(LoanWriterService.class);
 
-        List<Loan> loans = Arrays.asList(createLoan(1), createLoan(2), createLoan(3));
+        List<Loan> loans = Arrays.asList(Utils.createLoan(1), Utils.createLoan(2), Utils.createLoan(3));
 
         LoanJobImpl underTest = new LoanJobImpl(reader, writer, 1, ChronoUnit.DAYS);
         when(reader.getLoansFrom(any(OffsetDateTime.class))).thenReturn(loans);
@@ -80,9 +81,9 @@ public class LoanJobImplTest {
         LoanReaderService reader = mock(LoanReaderService.class);
         LoanWriterService writer = mock(LoanWriterService.class);
 
-        Loan loan1 = createLoan(1);
-        Loan loan2 = createLoan(2, OffsetDateTime.parse(loan1.getDatePublished()).plusMinutes(2).toString());
-        Loan loan3 = createLoan(3, OffsetDateTime.parse(loan1.getDatePublished()).plusMinutes(5).toString());
+        Loan loan1 = Utils.createLoan(1);
+        Loan loan2 = Utils.createLoan(2, OffsetDateTime.parse(loan1.getDatePublished()).plusMinutes(2).toString());
+        Loan loan3 = Utils.createLoan(3, OffsetDateTime.parse(loan1.getDatePublished()).plusMinutes(5).toString());
 
         LoanJobImpl underTest = new LoanJobImpl(reader, writer, 1, ChronoUnit.DAYS);
         when(reader.getLoansFrom(any(OffsetDateTime.class)))
@@ -99,20 +100,6 @@ public class LoanJobImplTest {
         ArgumentCaptor<Loan> loanCaptor = ArgumentCaptor.forClass(Loan.class);
         verify(writer, times(3)).writeLoan(loanCaptor.capture());
         assertEquals(Arrays.asList(loan1, loan2, loan3), loanCaptor.getAllValues());
-    }
-
-    private Loan createLoan(int id) {
-        Loan loan = new Loan();
-        loan.setId(id);
-        loan.setDatePublished(OffsetDateTime.now().toString());
-        return loan;
-    }
-
-    private Loan createLoan(int id, String published) {
-        Loan loan = new Loan();
-        loan.setId(id);
-        loan.setDatePublished(published);
-        return loan;
     }
 
     private long getEpoch(OffsetDateTime offsetDateTime) {
