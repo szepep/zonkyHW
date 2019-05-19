@@ -17,8 +17,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class LoanReaderServiceImplTest {
@@ -36,8 +34,9 @@ public class LoanReaderServiceImplTest {
         String url = "zonky" + "?datePublished__gte=" + timeStamp;
         HttpHeaders responseHeaders = createResponseHeaders(0);
 
-        ResponseEntity responseEntity = new ResponseEntity(emptyList(), responseHeaders, HttpStatus.OK);
+        ResponseEntity<List<Loan>> responseEntity = new ResponseEntity<>(emptyList(), responseHeaders, HttpStatus.OK);
 
+        //noinspection unchecked
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class),
                 any(ParameterizedTypeReference.class)))
                 .thenReturn(responseEntity);
@@ -47,6 +46,7 @@ public class LoanReaderServiceImplTest {
         underTest.getLoansFrom(now);
 
         ArgumentCaptor<HttpEntity> httpEntityArgumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+        //noinspection unchecked
         verify(restTemplate).exchange(eq(url), eq(HttpMethod.GET), httpEntityArgumentCaptor.capture(),
                 any(ParameterizedTypeReference.class));
 
@@ -72,9 +72,10 @@ public class LoanReaderServiceImplTest {
         Loan loan2 = createLoan(2);
         Loan loan3 = createLoan(3);
 
-        ResponseEntity responseEntity1 = new ResponseEntity(asList(loan1, loan2), responseHeaders, HttpStatus.OK);
-        ResponseEntity responseEntity2 = new ResponseEntity(singletonList(loan3), responseHeaders, HttpStatus.OK);
+        ResponseEntity<List<Loan>> responseEntity1 = new ResponseEntity<>(asList(loan1, loan2), responseHeaders, HttpStatus.OK);
+        ResponseEntity<List<Loan>> responseEntity2 = new ResponseEntity<>(singletonList(loan3), responseHeaders, HttpStatus.OK);
 
+        //noinspection unchecked
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class),
                 any(ParameterizedTypeReference.class)))
                 .thenReturn(responseEntity1)
@@ -97,10 +98,11 @@ public class LoanReaderServiceImplTest {
         Loan loan4 = createLoan(4);
         Loan loan5 = createLoan(5);
 
-        ResponseEntity responseEntity1 = new ResponseEntity(asList(loan1, loan2), createResponseHeaders(3), HttpStatus.OK);
-        ResponseEntity responseEntity2 = new ResponseEntity(asList(loan3, loan4), createResponseHeaders(5), HttpStatus.OK);
-        ResponseEntity responseEntity3 = new ResponseEntity(singletonList(loan5), createResponseHeaders(5), HttpStatus.OK);
+        ResponseEntity<List<Loan>> responseEntity1 = new ResponseEntity<>(asList(loan1, loan2), createResponseHeaders(3), HttpStatus.OK);
+        ResponseEntity<List<Loan>> responseEntity2 = new ResponseEntity<>(asList(loan3, loan4), createResponseHeaders(5), HttpStatus.OK);
+        ResponseEntity<List<Loan>> responseEntity3 = new ResponseEntity<>(singletonList(loan5), createResponseHeaders(5), HttpStatus.OK);
 
+        //noinspection unchecked
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class),
                 any(ParameterizedTypeReference.class)))
                 .thenReturn(responseEntity1)
@@ -117,6 +119,7 @@ public class LoanReaderServiceImplTest {
     @Test(expected = LoanReaderService.LoanReaderException.class)
     public void testException() throws LoanReaderService.LoanReaderException {
         RestTemplate restTemplate = mock(RestTemplate.class);
+        //noinspection unchecked
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class),
                 any(ParameterizedTypeReference.class)))
                 .thenThrow(new RestClientException(""));
@@ -129,8 +132,9 @@ public class LoanReaderServiceImplTest {
     public void testNotOkStatusCode() throws LoanReaderService.LoanReaderException {
         RestTemplate restTemplate = mock(RestTemplate.class);
 
-        ResponseEntity responseEntity = new ResponseEntity(emptyList(), new HttpHeaders(), HttpStatus.FORBIDDEN);
+        ResponseEntity<List<Loan>> responseEntity = new ResponseEntity<>(emptyList(), new HttpHeaders(), HttpStatus.FORBIDDEN);
 
+        //noinspection unchecked
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class),
                 any(ParameterizedTypeReference.class)))
                 .thenReturn(responseEntity);
@@ -140,10 +144,10 @@ public class LoanReaderServiceImplTest {
         List<Loan> loans = underTest.getLoansFrom(OffsetDateTime.now());
     }
 
-    private Loan createLoan(int i) {
-        Loan loan1 = new Loan();
-        loan1.setId(i);
-        return loan1;
+    private Loan createLoan(int id) {
+        Loan loan = new Loan();
+        loan.setId(id);
+        return loan;
     }
 
 

@@ -31,17 +31,20 @@ class LoanJobImpl implements Job {
     @Autowired
     LoanJobImpl(LoanReaderService reader,
                 LoanWriterService writer,
-                @Value("${zonky.first.read.time.value}") int period,
+                @Value("${zonky.first.read.time.value}") int readBack,
                 @Value("${zonky.first.read.time.unit}") ChronoUnit unit) {
         this.reader = reader;
         this.writer = writer;
-        lastTimestamp = OffsetDateTime.now().minus(period, unit);
+        lastTimestamp = OffsetDateTime.now().minus(readBack, unit);
     }
 
     @Override
     public void run() {
         try {
             List<Loan> loans = reader.getLoansFrom(lastTimestamp);
+            if (loans.isEmpty()) {
+                return;
+            }
             Loan lastItem = loans.get(loans.size() - 1);
             String datePublished = lastItem.getDatePublished();
 
